@@ -35,7 +35,7 @@ export class AppComponent {
   @ViewChild("logContainer")
   public logContainer!: ElementRef;
 
-  public alfrescoJsApi = new AlfrescoApi({ provider:'ECM', hostEcm: 'http://localhost:8080/' });
+  public alfrescoJsApi = new AlfrescoApi({ provider:'ECM', hostEcm: 'http://localhost:8080' });
 
   constructor(private monacoLoaderService: MonacoEditorLoaderService) {}
 
@@ -56,19 +56,19 @@ export class AppComponent {
         //   moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
         // });
 
-        // const alfrescoJsApiTypes = import('node_modules/@alfresco/js-api')
+        const alfrescoJsApiTypes = import('node_modules/alfresco-js-api')
 
-        // const types = [
-        //   { name: 'alfresco-js-api', types: alfrescoJsApiTypes },
-        // ]
+        const types = [
+          { name: 'alfresco-js-api', types: alfrescoJsApiTypes },
+        ]
 
-        // types.forEach(module => {
-        //   monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        //     `declare module "${module.name}" {
-        //     ${module.types}
-        //     }`
-        //   )
-        // })
+        types.forEach(module => {
+          monaco.languages.typescript.javascriptDefaults.addExtraLib(
+            `declare module "${module.name}" {
+            ${module.types}
+            }`
+          )
+        })
     });
 
     // Programatic content selection example
