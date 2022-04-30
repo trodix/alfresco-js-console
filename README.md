@@ -27,9 +27,9 @@ this.logger.error("Hello");
 
 ### Alfresco APIs
 
-```js
-this.nodesApi
-```
+| Alfresco APIs | Supported |
+|:-------------:|:---------:|
+|    NodesApi   |    yes    |
 
 ## Development server
 
@@ -53,7 +53,7 @@ The container is availlable at `http://localhost:8090/console` for the Javascrip
 
 > Alfresco containers must be running: `./run.sh build_start` on your Alfresco project (SDK 4.x)
 
-Alfresco containers and js-console container are comunicating throw the `docker_default` network
+Alfresco containers and js-console container are comunicating through the `docker_default` network
 
 ## Running unit tests
 
