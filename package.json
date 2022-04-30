@@ -10,6 +10,7 @@
   },
   "private": true,
   "dependencies": {
+    "@alfresco/js-api": "^4.10.0",
     "@angular/animations": "~13.3.0",
     "@angular/common": "~13.3.0",
     "@angular/compiler": "~13.3.0",
@@ -19,7 +20,6 @@
     "@angular/platform-browser-dynamic": "~13.3.0",
     "@angular/router": "~13.3.0",
     "@materia-ui/ngx-monaco-editor": "^6.0.0",
-    "alfresco-js-api": "^3.0.0-14a975b4461542cd2e108addd613a813313d32e8",
     "monaco-editor": "^0.33.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
