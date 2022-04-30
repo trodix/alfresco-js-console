@@ -1,7 +1,7 @@
 
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MonacoEditorLoaderService, MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
-import { AlfrescoApi, AlfrescoApiConfig, NodesApi } from '@alfresco/js-api';
+import * as Alfresco from '@alfresco/js-api';
 import { filter, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
@@ -18,7 +18,7 @@ export interface EditorContext {
     warn(msg: string | object): void,
     error(msg: string | object): void
   },
-  nodesApi: NodesApi
+  nodesApi: Alfresco.NodesApi
 }
 
 @Component({
@@ -36,7 +36,7 @@ export class AppComponent {
   @ViewChild("logContainer")
   public logContainer!: ElementRef;
 
-  public alfrescoJsApi = new AlfrescoApi(new AlfrescoApiConfig({ provider: 'ECM', hostEcm: "http://localhost:8090" }));
+  public alfrescoJsApi = new Alfresco.AlfrescoApi(new Alfresco.AlfrescoApiConfig({ provider: 'ECM', hostEcm: "http://localhost:8090" }));
 
   constructor(private monacoLoaderService: MonacoEditorLoaderService, private http: HttpClient) {}
 
@@ -130,8 +130,9 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
   }
 
   run() {
+    Alfresco.
     const contextEditor: EditorContext = {
-      nodesApi: new NodesApi(this.alfrescoJsApi),
+      nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi),
       logger: {
         log: (msg: string | object) => {
           this.logs.push({ type: 'log', timestamp: new Date(), msg });
