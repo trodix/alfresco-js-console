@@ -1,5 +1,5 @@
 .editor-component {
-    height: 80vh;
+    height: 50vh;
 }
 .editor-container {
     height: 100%;
@@ -11,10 +11,40 @@
     display: flex;
     justify-content: flex-end;
     padding: 10px;
+    > * {
+        margin: 0 5px;
+    }
 }
 
 .run {
     background-color: #15a915;
     color: #fff;
     font-size: large;
+}
+
+.clear-console {
+    background-color: #ffa500;
+    color: #fff;
+    font-size: large;
+}
+
+.log-container { overflow: auto; height: 300px; }
+
+.log-warn { color: #ffa500 }
+.log-error { color: #ff0000 }
+.log-info { color: #27bdf8 }
+.log-log { color: #2f2f2f }
+
+.log-warn, .log-error { font-weight: bold; }
+
+.time {
+    color: #8f8f8f;
+}
+
+.disable-select {
+    user-select: none; /* supported by Chrome and Opera */
+   -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+   -ms-user-select: none; /* Internet Explorer/Edge */
 }

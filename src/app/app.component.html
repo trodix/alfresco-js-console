@@ -4,7 +4,19 @@
     </ngx-monaco-editor>
   </div>
   <div class="actions">
+    <button class="clear-console" (click)="clearConsole()">Clear console</button>
     <button class="run" (click)="run()">Run</button>
+  </div>
+
+  <div class="log-container" #logContainer>
+    <div *ngFor="let log of logs; let last = last" class="log-{{log.type}}">
+      <span class="time disable-select">{{ log.timestamp | date:'HH:mm:ss' }}</span>&nbsp;
+      <pre *ngIf="isObject(log.msg); else basicLog"><code>{{ log.msg | json }}</code></pre>
+      <ng-template #basicLog>
+        <code>{{ log.msg }}</code>
+      </ng-template>
+      {{last ? scrollToBottom() : ''}}
+    </div>
   </div>
 </div>
 
