@@ -27,6 +27,8 @@ this.logger.error("Hello");
 
 ### Alfresco APIs
 
+See the developper API from Alfresco here: <https://github.com/Alfresco/alfresco-js-api>
+
 | Alfresco APIs | Supported |
 |:-------------:|:---------:|
 |    NodesApi   |    yes    |
