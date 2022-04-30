@@ -3,6 +3,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MonacoEditorLoaderService, MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
 import * as AlfrescoApi from 'alfresco-js-api';
 import { filter, take } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export interface Log {
   type: 'log' | 'info' | 'warn' | 'error';
@@ -35,9 +36,9 @@ export class AppComponent {
   @ViewChild("logContainer")
   public logContainer!: ElementRef;
 
-  public alfrescoJsApi = new AlfrescoApi({ provider:'ECM', hostEcm: 'http://localhost:8080' });
+  public alfrescoJsApi = new AlfrescoApi({ provider:'ECM', hostEcm: 'http://localhost:8090' });
 
-  constructor(private monacoLoaderService: MonacoEditorLoaderService) {}
+  constructor(private monacoLoaderService: MonacoEditorLoaderService, private http: HttpClient) {}
 
 
   editorInit(editor: MonacoStandaloneCodeEditor) {
@@ -46,29 +47,42 @@ export class AppComponent {
       filter(isLoaded => isLoaded),
       take(1),
     ).subscribe(() => {
-         // here, we retrieve monaco-editor instance
-         console.log("Code editor loaded");
-         console.log(monaco);
+        // here, we retrieve monaco-editor instance
+        console.log("Code editor loaded");
+        console.log(monaco);
 
-        //  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-        //   target: monaco.languages.typescript.ScriptTarget.ES2016,
-        //   allowNonTsExtensions: true,
-        //   moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-        // });
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+          target: monaco.languages.typescript.ScriptTarget.ES2016,
+          allowNonTsExtensions: true,
+          moduleResolution: monaco.languages.typescript.ModuleResolutionKind.Classic,
+        });
 
-        const alfrescoJsApiTypes = import('node_modules/alfresco-js-api')
+        this.http.get('assets/types/index.d.ts', { responseType: 'text' }).subscribe(alfrescoJsApiTypes => {
 
-        const types = [
-          { name: 'alfresco-js-api', types: alfrescoJsApiTypes },
-        ]
+          const typesDefinition: { name: string, types: string }[] = [
+            { name: 'AlfrescoApi', types: alfrescoJsApiTypes },
+          ];
 
-        types.forEach(module => {
-          monaco.languages.typescript.javascriptDefaults.addExtraLib(
-            `declare module "${module.name}" {
-            ${module.types}
-            }`
-          )
+          console.log(typesDefinition)
+
+          typesDefinition.forEach(module => {
+            
+            // monaco.languages.typescript.javascriptDefaults.addExtraLib(
+            //   `declare module "${module.name}" {
+            //     ${module.types}
+            //   }`
+            // )
+
+            monaco.languages.typescript.javascriptDefaults.addExtraLib(
+              `${module.types}`, "assets/types/index.d.ts"
+            )
+
+          });
+
+          console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
+
         })
+       
     });
 
     // Programatic content selection example
@@ -90,10 +104,27 @@ export class AppComponent {
 
   getCode() {
     return (
-      [
-        'this.logger.log(this.alfrescoJsApi);',
-        'this.logger.info("COUCOU !");'
-      ].join('\n')
+      `
+      const fileOrFolderId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
+
+      this.alfrescoJsApi.nodes.getNodeInfo(fileOrFolderId).then(data => {
+          this.logger.info('This is the name: ' + data.name );
+      }, error => {
+          this.logger.error('This node does not exist');
+      });
+
+      var folderNodeId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
+      
+      this.alfrescoJsApi.nodes.getNodeChildren(folderNodeId).then(data => {
+          this.logger.info('The number of children in this folder are ' + data.list.pagination.count);
+          data.list.entries.forEach(node => {
+              this.logger.info(node.entry.id + " - " + node.entry.name);
+          });
+      }, error => {
+          this.logger.error('This node does not exist');
+      });
+
+      `
     );
   }
 
@@ -132,3 +163,7 @@ export class AppComponent {
     this.logs = [];
   }
 }
+function DeclarationProvider(arg0: string, DeclarationProvider: any) {
+  throw new Error('Function not implemented.');
+}
+

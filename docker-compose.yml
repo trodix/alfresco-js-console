@@ -1,0 +1,15 @@
+version: '3.4'
+services:
+  alfresco-js-console:
+    image: alfresco-js-console:development
+    build:
+      dockerfile: docker/Dockerfile
+      context: .
+    ports:
+      - "8090:8090"
+    networks:
+      - docker_default
+
+networks:
+  docker_default:
+    name: docker_default
