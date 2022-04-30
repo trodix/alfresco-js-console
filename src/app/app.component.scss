@@ -1,0 +1,20 @@
+.editor-component {
+    height: 80vh;
+}
+.editor-container {
+    height: 100%;
+    margin: 0px;
+}
+
+.actions {
+    background-color: #2e2e2e;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+}
+
+.run {
+    background-color: #15a915;
+    color: #fff;
+    font-size: large;
+}
