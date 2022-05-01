@@ -32,6 +32,7 @@ See the developper API from Alfresco here: <https://github.com/Alfresco/alfresco
 | Alfresco APIs | Supported |
 |:-------------:|:---------:|
 |    NodesApi   |    yes    |
+|   SearchApi   |    yes    |
 
 ## Development server
 

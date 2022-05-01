@@ -1,5 +1,5 @@
 
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, Type, ViewChild } from '@angular/core';
 import { MonacoEditorLoaderService, MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
 import * as Alfresco from '@alfresco/js-api';
 import { filter, take } from 'rxjs';
@@ -20,7 +20,8 @@ export interface EditorContext {
     warn(msg: string | object): void,
     error(msg: string | object): void
   },
-  nodesApi: Alfresco.NodesApi
+  nodesApi: Alfresco.NodesApi,
+  searchApi: Alfresco.SearchApi
 }
 
 @Component({
@@ -69,41 +70,129 @@ export class AppComponent implements OnInit {
           moduleResolution: monaco.languages.typescript.ModuleResolutionKind.Classic,
         });
 
-        this.http.get('assets/types/index.d.ts', { responseType: 'text' }).subscribe(alfrescoJsApiTypes => {
+        monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
-          const typesDefinition: { name: string, types: string }[] = [
-            { name: 'AlfrescoApi', types: alfrescoJsApiTypes },
-          ];
+        monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          [
+            'interface EditorContext {',
+            ' logger: {',
+            '   log(msg: string | object): void,',
+            '   info(msg: string | object): void,',
+            '   warn(msg: string | object): void,',
+            '   error(msg: string | object): void',
+            ' },',
+            ' nodesApi: object,',
+            ' searchApi: {',
+            '  search({ query: string }): Promise<any>',
+            ' },',
+            '};',
+            'declare const alfresco: EditorContext;'
+            ].join('\n'), 'filename/editor-context.d.ts'
+        );
 
-          console.log(typesDefinition)
+        // this.http.get('assets/types/index.d.ts', { responseType: 'text' }).subscribe(alfrescoJsApiTypes => {
 
-          typesDefinition.forEach(module => {
+        //   const typesDefinition: { name: string, types: string }[] = [
+        //     { name: 'AlfrescoApi', types: alfrescoJsApiTypes },
+        //   ];
+
+        //   console.log(typesDefinition)
+
+        //   typesDefinition.forEach(module => {
             
-            // monaco.languages.typescript.javascriptDefaults.addExtraLib(
-            //   `declare module "${module.name}" {
-            //     ${module.types}
-            //   }`
-            // )
+        //     // monaco.languages.typescript.javascriptDefaults.addExtraLib(
+        //     //   `declare module "${module.name}" {
+        //     //     ${module.types}
+        //     //   }`
+        //     // )
 
-            monaco.languages.typescript.javascriptDefaults.addExtraLib(
-              `${module.types}`, "assets/types/index.d.ts"
-            )
+        //     monaco.languages.typescript.javascriptDefaults.addExtraLib(
+        //       `${module.types}`, "assets/types/index.d.ts"
+        //     )
 
-          });
+        //   });
 
-          console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
+        //   console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
 
-        })
+        // })
+
+
+
+        
+
+
+        // function createDependencyProposals(range: any): monaco.languages.CompletionItem[] {
+        //   // returning a static list of proposals, not even looking at the prefix (filtering is done by the Monaco editor),
+        //   // here you could do a server side lookup
+        //   return [
+        //     // Loggers
+        //     {
+        //       label: 'this.logger.log',
+        //       kind: monaco.languages.CompletionItemKind.Function,
+        //       documentation: 'logger.log',
+        //       insertText: 'this.logger.log()',
+        //       range: range,
+        //     },
+        //     {
+        //       label: 'this.logger.info',
+        //       kind: monaco.languages.CompletionItemKind.Function,
+        //       documentation: 'logger.info',
+        //       insertText: 'this.logger.info()',
+        //       range: range,
+        //     },
+        //     {
+        //       label: 'this.logger.warn',
+        //       kind: monaco.languages.CompletionItemKind.Function,
+        //       documentation: 'logger.warn',
+        //       insertText: 'this.logger.warn()',
+        //       range: range,
+        //     },
+        //     {
+        //       label: 'this.logger.error',
+        //       kind: monaco.languages.CompletionItemKind.Function,
+        //       documentation: 'logger.error',
+        //       insertText: 'this.logger.error()',
+        //       range: range,
+        //     },
+        //     // Alfresco APIs
+        //     {
+        //       label: 'nodesApi',
+        //       kind: monaco.languages.CompletionItemKind.Property,
+        //       documentation: 'Alfresco.NodesApi',
+        //       insertText: 'this.nodesApi',
+        //       range: range,
+        //     }
+        //   ];
+        // }
+
+        // monaco.languages.registerCompletionItemProvider('javascript', {
+        //   provideCompletionItems: function (model, position) {
+        //     // find out if we are completing a property in the 'this' object.
+        //     var textUntilPosition = model.getValueInRange({
+        //       startLineNumber: 1,
+        //       startColumn: 1,
+        //       endLineNumber: position.lineNumber,
+        //       endColumn: position.column
+        //     });
+        //     // var match = textUntilPosition.includes("this")
+        //     // if (!match) {
+        //     //   console.log(textUntilPosition);
+        //     //   return { suggestions: [] };
+        //     // }
+        //     var word = model.getWordUntilPosition(position);
+        //     var range = {
+        //       startLineNumber: position.lineNumber,
+        //       endLineNumber: position.lineNumber,
+        //       startColumn: word.startColumn,
+        //       endColumn: word.endColumn
+        //     };
+        //     return {
+        //       suggestions: createDependencyProposals(range)
+        //     };
+        //   }
+        // });
+
        
-    });
-
-    // Programatic content selection example
-
-    editor.setSelection({
-      startLineNumber: 1,
-      startColumn: 1,
-      endColumn: 50,
-      endLineNumber: 3,
     });
 
     this.tryLoginFromLocalStorage();
@@ -112,7 +201,6 @@ export class AppComponent implements OnInit {
   getCode() {
     return (
 `
-
 const fileOrFolderId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
 
 this.nodesApi.getNode(fileOrFolderId).then(node => {
@@ -131,7 +219,6 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
 }, error => {
     this.logger.error('This node does not exist');
 });
-
 `
     );
   }
@@ -164,6 +251,7 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
   run() {
     const contextEditor: EditorContext = {
       nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi),
+      searchApi: new Alfresco.SearchApi(this.alfrescoJsApi),
       logger: {
         log: (msg: string | object) => {
           this.logs.push({ type: 'log', timestamp: new Date(), msg });
@@ -182,7 +270,7 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
 
     try {
       // Execute the code from the editor
-      new Function(this.code).bind(contextEditor)();
+      new Function("const alfresco = this;\n" + this.code).bind(contextEditor)();
     } catch (error) {
       this.logs.push({ type: 'error', timestamp: new Date(), msg: error })
     }
