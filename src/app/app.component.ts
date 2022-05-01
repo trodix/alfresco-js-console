@@ -5,7 +5,6 @@ import * as Alfresco from '@alfresco/js-api';
 import { filter, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { AlfrescoApiConfig } from '@alfresco/js-api';
 
 export interface Log {
   type: 'log' | 'info' | 'warn' | 'error';
@@ -39,7 +38,7 @@ export class AppComponent implements OnInit {
   @ViewChild("logContainer")
   public logContainer!: ElementRef;
 
-  public alfrescoConfig: AlfrescoApiConfig = new Alfresco.AlfrescoApiConfig({ provider: 'ECM', hostEcm: "http://localhost:8090" });
+  public alfrescoConfig: Alfresco.AlfrescoApiConfig = new Alfresco.AlfrescoApiConfig({ provider: 'ECM', hostEcm: "http://localhost:8090" });
 
   public alfrescoJsApi = new Alfresco.AlfrescoApi(this.alfrescoConfig);
 
@@ -72,23 +71,30 @@ export class AppComponent implements OnInit {
 
         monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
-        monaco.languages.typescript.javascriptDefaults.addExtraLib(
-          [
-            'interface EditorContext {',
-            ' logger: {',
-            '   log(msg: string | object): void,',
-            '   info(msg: string | object): void,',
-            '   warn(msg: string | object): void,',
-            '   error(msg: string | object): void',
-            ' },',
-            ' nodesApi: object,',
-            ' searchApi: {',
-            '  search({ query: string }): Promise<any>',
-            ' },',
-            '};',
-            'declare const alfresco: EditorContext;'
-            ].join('\n'), 'filename/editor-context.d.ts'
-        );
+        // monaco.languages.typescript.javascriptDefaults.addExtraLib(
+        //   [
+        //     'interface EditorContext {',
+        //     ' logger: {',
+        //     '   log(msg: string | object): void,',
+        //     '   info(msg: string | object): void,',
+        //     '   warn(msg: string | object): void,',
+        //     '   error(msg: string | object): void',
+        //     ' },',
+        //     ' nodesApi: object,',
+        //     ' searchApi: {',
+        //     '  search({ query: string }): Promise<any>',
+        //     ' },',
+        //     '};',
+        //     'declare const alfresco: EditorContext;'
+        //     ].join('\n'), 'filename/editor-context.d.ts'
+        // );
+
+        let template = this.buildTypes(Alfresco);
+
+        
+
+        console.log(template);
+        monaco.languages.typescript.javascriptDefaults.addExtraLib(template);
 
         // this.http.get('assets/types/index.d.ts', { responseType: 'text' }).subscribe(alfrescoJsApiTypes => {
 
@@ -193,6 +199,7 @@ export class AppComponent implements OnInit {
         // });
 
        
+
     });
 
     this.tryLoginFromLocalStorage();
@@ -268,12 +275,8 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
       }
     }
 
-    try {
-      // Execute the code from the editor
-      new Function("const alfresco = this;\n" + this.code).bind(contextEditor)();
-    } catch (error) {
-      this.logs.push({ type: 'error', timestamp: new Date(), msg: error })
-    }
+    // Execute the code from the editor
+    new Function("const alfresco = this;\n" + this.code).bind(contextEditor)();
     
   }
 
@@ -288,4 +291,53 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
   clearConsole() {
     this.logs = [];
   }
+
+  buildTypes(namespace: any): string {
+    let template = "";
+
+    
+
+    template += this.buildInterfacesTypes(null, Alfresco);
+
+    template += [
+      'interface EditorContext {',
+      ' logger: {',
+      '   log(msg: string | object): void,',
+      '   info(msg: string | object): void,',
+      '   warn(msg: string | object): void,',
+      '   error(msg: string | object): void',
+      ' },\n'
+    ].join('\n')
+
+    for (const module in namespace) {
+      //console.log(module);
+      template += `${module === String(module).toUpperCase() ? module : module.charAt(0).toLowerCase() + module.slice(1)}: ${module},\n`
+    }
+
+    template += [
+      '};',
+      'declare const alfresco: EditorContext;'
+    ].join('\n')
+
+    return template;
+  }
+
+  buildInterfacesTypes(parent: any, namespace: any): string {
+
+    let template = "";
+
+    for (const module in namespace) {
+      template += 
+        `declare interface ${module} {`
+          // TODO
+        // if (module == parent || parent == null) {
+        //   template += this.buildInterfacesTypes(module, namespace);
+        // }
+      template += 
+        `},\n`
+    }
+
+    return template;
+  }
+
 }
