@@ -16,16 +16,22 @@
     }
 }
 
-.run {
-    background-color: #15a915;
-    color: #fff;
-    font-size: large;
-}
+.auth-banner {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 5px;
+    input {
+        padding: 5px;
+        margin: 0 5px;
+    }
 
-.clear-console {
-    background-color: #ffa500;
-    color: #fff;
-    font-size: large;
+    > .loggin-actions {
+        display: flex;
+        align-items: center;
+        * {
+            margin: 0 10px;
+        }
+    }
 }
 
 .log-container { overflow: auto; height: 300px; }

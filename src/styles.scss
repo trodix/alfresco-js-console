@@ -11,12 +11,42 @@ button {
     padding: 0 16px;
     border-radius: 5px;
     cursor: pointer;
+    font-size: large;
+
+    &.success {
+        background-color: #15a915;
+        color: #fff;
+    }
+
+    &.warn {
+        background-color: #ffa500;
+        color: #fff;
+    }
+
+    &.error {
+        background-color: #ff0000;
+        color: #fff;
+    }
+
+    &.info {
+        background-color: #27bdf8;
+        color: #fff;
+    }
+
+    &:hover {
+        opacity: 0.9;
+    }
+
+    &:active {
+        opacity: 0.8;
+    }
 }
 
-button:hover {
-    opacity: 0.9;
-}
-
-button:active {
-    opacity: 0.8;
+input {
+    all: unset;
+    font-size: large;
+    background-color: rgb(222, 222, 222);
+    padding: 6px 6px;
+    border: 1px solid #464646;
+    border-radius: 5px;
 }

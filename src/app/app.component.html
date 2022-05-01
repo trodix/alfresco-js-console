@@ -1,11 +1,24 @@
 <div class="editor-component">
+  <div class="auth-banner">
+    <div class="loggin-form" *ngIf="!isLoggedIn()">
+      <form action="">
+        <input type="text" placeholder="Username" [formControl]="username">
+        <input type="password" placeholder="Password" [formControl]="password">
+        <button class="info" (click)="login()">Log-in</button>
+      </form>
+    </div>
+    <div class="loggin-actions" *ngIf="isLoggedIn()">
+      <p>Logged in to Alfresco at<span>{{ alfrescoConfig.hostEcm }}</span></p>
+      <button class="error" (click)="logout()">Log-out</button>
+    </div>
+  </div>
   <div class="editor-container">
     <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" (init)="editorInit($event)">
     </ngx-monaco-editor>
   </div>
   <div class="actions">
-    <button class="clear-console" (click)="clearConsole()">Clear console</button>
-    <button class="run" (click)="run()">Run</button>
+    <button class="warn" (click)="clearConsole()">Clear console</button>
+    <button class="success" (click)="run()">Run</button>
   </div>
 
   <div class="log-container" #logContainer>

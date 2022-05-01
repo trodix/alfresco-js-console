@@ -1,9 +1,11 @@
 
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MonacoEditorLoaderService, MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
 import * as Alfresco from '@alfresco/js-api';
 import { filter, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+import { AlfrescoApiConfig } from '@alfresco/js-api';
 
 export interface Log {
   type: 'log' | 'info' | 'warn' | 'error';
@@ -26,7 +28,7 @@ export interface EditorContext {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   public editorOptions = { theme: 'vs-dark', language: 'javascript' };
   public code = this.getCode();
@@ -36,12 +38,22 @@ export class AppComponent {
   @ViewChild("logContainer")
   public logContainer!: ElementRef;
 
-  public alfrescoJsApi = new Alfresco.AlfrescoApi(new Alfresco.AlfrescoApiConfig({ provider: 'ECM', hostEcm: "http://localhost:8090" }));
+  public alfrescoConfig: AlfrescoApiConfig = new Alfresco.AlfrescoApiConfig({ provider: 'ECM', hostEcm: "http://localhost:8090" });
+
+  public alfrescoJsApi = new Alfresco.AlfrescoApi(this.alfrescoConfig);
+
+  public username: FormControl = new FormControl('');
+  public password: FormControl = new FormControl('');
+
+  public isLoggedIn(): boolean {
+    return this.alfrescoJsApi.isLoggedIn();
+  }
 
   constructor(private monacoLoaderService: MonacoEditorLoaderService, private http: HttpClient) {}
 
+  public ngOnInit(): void {}
 
-  editorInit(editor: MonacoStandaloneCodeEditor) {
+  editorInit(editor: MonacoStandaloneCodeEditor): void {
     
     this.monacoLoaderService.isMonacoLoaded$.pipe(
       filter(isLoaded => isLoaded),
@@ -94,12 +106,7 @@ export class AppComponent {
       endLineNumber: 3,
     });
 
-    this.alfrescoJsApi.login('admin', 'admin').then(ticket => {
-        console.log('API called successfully to login into Alfresco Content Services. ' + ticket);
-    }, error => {
-        console.error(error);
-    });
-
+    this.tryLoginFromLocalStorage();
   }
 
   getCode() {
@@ -129,8 +136,32 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
     );
   }
 
+  login() {
+    this.alfrescoJsApi.login(this.username.value, this.password.value).then(ticket => {
+      console.log('API called successfully to login into Alfresco Content Services by username/password. ' + ticket);
+      localStorage.setItem("ticket-ECM", ticket);
+    }, error => {
+        console.error(error);
+    });
+  }
+
+  logout() {
+    this.alfrescoJsApi.logout();
+  }
+
+  tryLoginFromLocalStorage() {
+    const ticket = localStorage.getItem("ticket-ECM");
+    if (ticket) {
+      this.alfrescoJsApi.loginTicket(ticket, "").then(ticket => {
+        console.log('API called successfully to login into Alfresco Content Services by ticket. ' + ticket);
+      }, error => {
+          console.error(error);
+          localStorage.removeItem("ticket-ECM");
+      });
+    }
+  }
+
   run() {
-    Alfresco.
     const contextEditor: EditorContext = {
       nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi),
       logger: {
@@ -149,8 +180,13 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
       }
     }
 
-    // Execute the code from the editor
-    new Function(this.code).bind(contextEditor)();
+    try {
+      // Execute the code from the editor
+      new Function(this.code).bind(contextEditor)();
+    } catch (error) {
+      this.logs.push({ type: 'error', timestamp: new Date(), msg: error })
+    }
+    
   }
 
   isObject(e: any) {
@@ -165,7 +201,3 @@ this.nodesApi.listNodeChildren(folderNodeId).then(data => {
     this.logs = [];
   }
 }
-function DeclarationProvider(arg0: string, DeclarationProvider: any) {
-  throw new Error('Function not implemented.');
-}
-

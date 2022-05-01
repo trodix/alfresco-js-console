@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { HttpClientModule } from '@angular/common/http';
     BrowserModule,
     MonacoEditorModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
