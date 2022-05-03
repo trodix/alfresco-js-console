@@ -3,8 +3,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": [],
     "skipLibCheck": true,
+    "types": [
+      "node",
+      "webpack-env" // here
+    ]
   },
   "files": [
     "src/main.ts",

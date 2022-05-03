@@ -1,6 +1,6 @@
 
 import { Component, ElementRef, OnInit, Type, ViewChild } from '@angular/core';
-import { MonacoEditorLoaderService, MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
+import { MonacoEditorLoaderService, MonacoStandaloneCodeEditor, MonacoEditorConstructionOptions } from '@materia-ui/ngx-monaco-editor';
 import * as Alfresco from '@alfresco/js-api';
 import { filter, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -30,7 +30,7 @@ export interface EditorContext {
 })
 export class AppComponent implements OnInit {
 
-  public editorOptions = { theme: 'vs-dark', language: 'javascript' };
+  public editorOptions: MonacoEditorConstructionOptions = { theme: 'vs-dark', language: 'javascript' };
   public code = this.getCode();
 
   public logs: Log[] = [];
@@ -62,70 +62,71 @@ export class AppComponent implements OnInit {
         // here, we retrieve monaco-editor instance
         console.log("Code editor loaded");
         console.log(monaco);
+        
+        // const files = require.context('!!raw-loader!/node_modules/@alfresco/js-api/typings/src/', true, /\.d.ts$/);
+        // let template = "";
+        
+        //const files = require.context('!!raw-loader!/src/app/types', true, /\.d.ts$/);
+        
+        // files.keys().forEach((key: string) => {
+        //   template += files(key).default;
+        //   // We add every .d.ts file to Monaco
+        //   monaco.languages.typescript.javascriptDefaults.addExtraLib(
+        //     files(key).default,
+        //     `file:///node_modules/@alfresco/js-api/typings/src/${key.slice(2)}`
+        //   );
+        // });
 
-        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+        console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
+
+        const compilerOptions: monaco.languages.typescript.CompilerOptions = {
           target: monaco.languages.typescript.ScriptTarget.ES2016,
           allowNonTsExtensions: true,
           moduleResolution: monaco.languages.typescript.ModuleResolutionKind.Classic,
-        });
+          lib: ["es2016"],
+          allowJs: true
+        }
 
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions(compilerOptions);
         monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
-        // monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        //   [
-        //     'interface EditorContext {',
-        //     ' logger: {',
-        //     '   log(msg: string | object): void,',
-        //     '   info(msg: string | object): void,',
-        //     '   warn(msg: string | object): void,',
-        //     '   error(msg: string | object): void',
-        //     ' },',
-        //     ' nodesApi: object,',
-        //     ' searchApi: {',
-        //     '  search({ query: string }): Promise<any>',
-        //     ' },',
-        //     '};',
-        //     'declare const alfresco: EditorContext;'
-        //     ].join('\n'), 'filename/editor-context.d.ts'
-        // );
+        const alfrescoLibs: string[] = [];
 
-        let template = this.buildTypes(Alfresco);
+        const getMethods = async (moduleName: string): Promise<string[]> => {
+          const module = await import("@alfresco/js-api");
+          return [];
+        }
 
-        
+        for (const module in Alfresco) {
+          const methods = getMethods(module).then(method => {
+            console.log(methods);
+            if (module !== module.toLocaleUpperCase() && module.toLocaleLowerCase().includes("api")) {
+              alfrescoLibs.push(module.charAt(0).toLocaleLowerCase() + module.slice(1) + ": " + "object");
+            }
+          });
+        }
 
-        console.log(template);
-        monaco.languages.typescript.javascriptDefaults.addExtraLib(template);
+        monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          [
+            'interface EditorContext {',
+            ' logger: {',
+            '   log(msg: string | object): void,',
+            '   info(msg: string | object): void,',
+            '   warn(msg: string | object): void,',
+            '   error(msg: string | object): void',
+            ' },',
+            alfrescoLibs.join(",\n"),
+            '};',
+            'declare const alfresco: EditorContext;'
+            ].join('\n'), 'filename/editor-context.d.ts'
+        );
 
-        // this.http.get('assets/types/index.d.ts', { responseType: 'text' }).subscribe(alfrescoJsApiTypes => {
-
-        //   const typesDefinition: { name: string, types: string }[] = [
-        //     { name: 'AlfrescoApi', types: alfrescoJsApiTypes },
-        //   ];
-
-        //   console.log(typesDefinition)
-
-        //   typesDefinition.forEach(module => {
-            
-        //     // monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        //     //   `declare module "${module.name}" {
-        //     //     ${module.types}
-        //     //   }`
-        //     // )
-
-        //     monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        //       `${module.types}`, "assets/types/index.d.ts"
-        //     )
-
-        //   });
-
-        //   console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs());
-
-        // })
-
-
+        //let template = this.buildTypes(Alfresco);
+        //console.log(template);
+        //monaco.languages.typescript.javascriptDefaults.addExtraLib(template);
 
         
-
+      
 
         // function createDependencyProposals(range: any): monaco.languages.CompletionItem[] {
         //   // returning a static list of proposals, not even looking at the prefix (filtering is done by the Monaco editor),
@@ -206,27 +207,27 @@ export class AppComponent implements OnInit {
   }
 
   getCode() {
-    return (
-`
-const fileOrFolderId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
+    return (""
+// `
+// const fileOrFolderId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
 
-this.nodesApi.getNode(fileOrFolderId).then(node => {
-    this.logger.info('This is the name: ' + node.entry.name );
-}, error => {
-    this.logger.error('This node does not exist');
-});
+// this.nodesApi.getNode(fileOrFolderId).then(node => {
+//     this.logger.info('This is the name: ' + node.entry.name );
+// }, error => {
+//     this.logger.error('This node does not exist');
+// });
 
-const folderNodeId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
+// const folderNodeId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
 
-this.nodesApi.listNodeChildren(folderNodeId).then(data => {
-    this.logger.info('The number of children in this folder are ' + data.list.pagination.count);
-    data.list.entries.forEach(node => {
-        this.logger.info(node.entry.id + " - " + node.entry.name);
-    });
-}, error => {
-    this.logger.error('This node does not exist');
-});
-`
+// this.nodesApi.listNodeChildren(folderNodeId).then(data => {
+//     this.logger.info('The number of children in this folder are ' + data.list.pagination.count);
+//     data.list.entries.forEach(node => {
+//         this.logger.info(node.entry.id + " - " + node.entry.name);
+//     });
+// }, error => {
+//     this.logger.error('This node does not exist');
+// });
+// `
     );
   }
 
