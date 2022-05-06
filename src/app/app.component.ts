@@ -120,8 +120,8 @@ export class AppComponent implements OnInit {
 
   run() {
     let contextEditor = {
-      nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi),
-      searchApi: new Alfresco.SearchApi(this.alfrescoJsApi),
+      // nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi),
+      // searchApi: new Alfresco.SearchApi(this.alfrescoJsApi),
       logger: {
         log: (msg: string | object) => {
           this.logs.push({ type: 'log', timestamp: new Date(), msg });
@@ -135,33 +135,51 @@ export class AppComponent implements OnInit {
         error: (msg: string | object) => {
           this.logs.push({ type: 'error', timestamp: new Date(), msg });
         }
-      }
+      },
+      alfrescoApiConfig: new Alfresco.AlfrescoApiConfig(this.alfrescoJsApi), 
+      aboutApi: new Alfresco.AboutApi(this.alfrescoJsApi), 
+      adminEndpointsApi: new Alfresco.AdminEndpointsApi(this.alfrescoJsApi), 
+      adminGroupsApi: new Alfresco.AdminGroupsApi(this.alfrescoJsApi), 
+      adminTenantsApi: new Alfresco.AdminTenantsApi(this.alfrescoJsApi), 
+      adminUsersApi: new Alfresco.AdminUsersApi(this.alfrescoJsApi),    
+      commentsApi: new Alfresco.CommentsApi(this.alfrescoJsApi), 
+      contentApi: new Alfresco.ContentApi(this.alfrescoJsApi), 
+      groupsApi: new Alfresco.GroupsApi(this.alfrescoJsApi), 
+      iDMSyncApi: new Alfresco.IDMSyncApi(this.alfrescoJsApi), 
+      integrationAlfrescoCloudApi: new Alfresco.IntegrationAlfrescoCloudApi(this.alfrescoJsApi), 
+      integrationAlfrescoOnPremiseApi: new Alfresco.IntegrationAlfrescoOnPremiseApi(this.alfrescoJsApi), 
+      integrationBoxApi: new Alfresco.IntegrationBoxApi(this.alfrescoJsApi), 
+      integrationDriveApi: new Alfresco.IntegrationDriveApi(this.alfrescoJsApi),  
+      modelJsonBpmnApi: new Alfresco.ModelJsonBpmnApi(this.alfrescoJsApi), 
+      modelsApi: new Alfresco.ModelsApi(this.alfrescoJsApi), 
+      modelsHistoryApi: new Alfresco.ModelsHistoryApi(this.alfrescoJsApi), 
+      processDefinitionsApi: new Alfresco.ProcessDefinitionsApi(this.alfrescoJsApi),  
+      processInstanceVariablesApi: new Alfresco.ProcessInstanceVariablesApi(this.alfrescoJsApi), 
+      processInstancesApi: new Alfresco.ProcessInstancesApi(this.alfrescoJsApi),     
+      reportApi: new Alfresco.ReportApi(this.alfrescoJsApi),  
+      systemPropertiesApi: new Alfresco.SystemPropertiesApi(this.alfrescoJsApi), 
+      taskActionsApi: new Alfresco.TaskActionsApi(this.alfrescoJsApi),  
+      taskFormsApi: new Alfresco.TaskFormsApi(this.alfrescoJsApi), 
+      temporaryApi: new Alfresco.TemporaryApi(this.alfrescoJsApi),  
+      userFiltersApi: new Alfresco.UserFiltersApi(this.alfrescoJsApi),      
+      customModelApi: new Alfresco.CustomModelApi(this.alfrescoJsApi), 
+      downloadsApi: new Alfresco.DownloadsApi(this.alfrescoJsApi), 
+      favoritesApi: new Alfresco.FavoritesApi(this.alfrescoJsApi),  
+      networksApi: new Alfresco.NetworksApi(this.alfrescoJsApi), 
+      nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi), 
+      peopleApi: new Alfresco.PeopleApi(this.alfrescoJsApi), 
+      queriesApi: new Alfresco.QueriesApi(this.alfrescoJsApi), 
+      ratingsApi: new Alfresco.RatingsApi(this.alfrescoJsApi), 
+      renditionsApi: new Alfresco.RenditionsApi(this.alfrescoJsApi), 
+      sharedlinksApi: new Alfresco.SharedlinksApi(this.alfrescoJsApi), 
+      sitesApi: new Alfresco.SitesApi(this.alfrescoJsApi), 
+      tagsApi: new Alfresco.TagsApi(this.alfrescoJsApi), 
+      versionsApi: new Alfresco.VersionsApi(this.alfrescoJsApi), 
+      webscriptApi: new Alfresco.WebscriptApi(this.alfrescoJsApi),       
     }
 
-    // const getInstance = (className: string): Object | null => {
-    //   for (const c in Alfresco) {
-    //     if (c == className) {
-    //       const obj = Object.create(Alfresco[c]).prototype;
-    //       //console.log(obj)
-    //       return new obj.constructor(this.alfrescoJsApi);
-    //     }
-    //   }
-    //   return null;
-    // }
-
-    // getInstance("AlfrescoApi");
-
-
-
-    // contextEditor = { 
-    //   ...contextEditor, 
-    //   ...this.monacoElements.map(element => { 
-    //     return element[element.klass.charAt(0).toLowerCase() + element.klass.slice(1)] = getInstance(element.klass) 
-    //   })
-      
-    // };
-
-    // console.log(contextEditor);
+    // const r = this.monacoElements.filter(i => i.klass.toUpperCase().includes("API")).map(element => element.klass.charAt(0).toLowerCase() + element.klass.slice(1) + ": " + "new Alfresco." + element.klass + "(this.alfrescoJsApi)").join(", \n");
+    // console.log(r);
 
     // Execute the code from the editor
     new Function("const alfresco = this;\n" + this.code).bind(contextEditor)();
