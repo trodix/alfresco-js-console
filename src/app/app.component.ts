@@ -5,7 +5,7 @@ import * as Alfresco from '@alfresco/js-api';
 import { filter, take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { MonacoTypesBuilder } from 'src/utils/MonacoTypesBuilder';
+import { EntryType, MonacoTypesBuilder } from 'src/utils/MonacoTypesBuilder';
 
 export interface Log {
   type: 'log' | 'info' | 'warn' | 'error';
@@ -13,16 +13,16 @@ export interface Log {
   msg: any;
 }
 
-export interface EditorContext {
-  logger: {
-    log(msg: string | object): void,
-    info(msg: string | object): void,
-    warn(msg: string | object): void,
-    error(msg: string | object): void
-  },
-  nodesApi: Alfresco.NodesApi,
-  searchApi: Alfresco.SearchApi
-}
+// export interface EditorContext {
+//   logger: {
+//     log(msg: string | object): void,
+//     info(msg: string | object): void,
+//     warn(msg: string | object): void,
+//     error(msg: string | object): void
+//   },
+//   nodesApi: Alfresco.NodesApi,
+//   searchApi: Alfresco.SearchApi
+// }
 
 @Component({
   selector: 'app-root',
@@ -43,6 +43,8 @@ export class AppComponent implements OnInit {
 
   public alfrescoJsApi = new Alfresco.AlfrescoApi(this.alfrescoConfig);
 
+  public monacoElements: EntryType[];
+
   public username: FormControl = new FormControl('');
   public password: FormControl = new FormControl('');
 
@@ -50,7 +52,9 @@ export class AppComponent implements OnInit {
     return this.alfrescoJsApi.isLoggedIn();
   }
 
-  constructor(private monacoLoaderService: MonacoEditorLoaderService, private http: HttpClient) {}
+  constructor(private monacoLoaderService: MonacoEditorLoaderService, private http: HttpClient) {
+    this.monacoElements = [];
+  }
 
   public ngOnInit(): void {}
 
@@ -65,7 +69,9 @@ export class AppComponent implements OnInit {
         console.log(monaco);
         
         const files = require.context('!!raw-loader!/node_modules/@alfresco/js-api/typings/src/', true, /\.d.ts$/);
-        const monacoTypes = new MonacoTypesBuilder(files).build();
+        const monacoTypeBuilder = new MonacoTypesBuilder(files);
+        const monacoTypes = monacoTypeBuilder.build();
+        this.monacoElements = monacoTypeBuilder.getElements();
 
         const compilerOptions: monaco.languages.typescript.CompilerOptions = {
           target: monaco.languages.typescript.ScriptTarget.ES2016,
@@ -84,28 +90,7 @@ export class AppComponent implements OnInit {
   }
 
   getCode() {
-    return (""
-// `
-// const fileOrFolderId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
-
-// this.nodesApi.getNode(fileOrFolderId).then(node => {
-//     this.logger.info('This is the name: ' + node.entry.name );
-// }, error => {
-//     this.logger.error('This node does not exist');
-// });
-
-// const folderNodeId = '80a94ac8-3ece-47ad-864e-5d939424c47c';
-
-// this.nodesApi.listNodeChildren(folderNodeId).then(data => {
-//     this.logger.info('The number of children in this folder are ' + data.list.pagination.count);
-//     data.list.entries.forEach(node => {
-//         this.logger.info(node.entry.id + " - " + node.entry.name);
-//     });
-// }, error => {
-//     this.logger.error('This node does not exist');
-// });
-// `
-    );
+    return "";
   }
 
   login() {
@@ -134,7 +119,7 @@ export class AppComponent implements OnInit {
   }
 
   run() {
-    const contextEditor: EditorContext = {
+    let contextEditor = {
       nodesApi: new Alfresco.NodesApi(this.alfrescoJsApi),
       searchApi: new Alfresco.SearchApi(this.alfrescoJsApi),
       logger: {
@@ -152,6 +137,31 @@ export class AppComponent implements OnInit {
         }
       }
     }
+
+    // const getInstance = (className: string): Object | null => {
+    //   for (const c in Alfresco) {
+    //     if (c == className) {
+    //       const obj = Object.create(Alfresco[c]).prototype;
+    //       //console.log(obj)
+    //       return new obj.constructor(this.alfrescoJsApi);
+    //     }
+    //   }
+    //   return null;
+    // }
+
+    // getInstance("AlfrescoApi");
+
+
+
+    // contextEditor = { 
+    //   ...contextEditor, 
+    //   ...this.monacoElements.map(element => { 
+    //     return element[element.klass.charAt(0).toLowerCase() + element.klass.slice(1)] = getInstance(element.klass) 
+    //   })
+      
+    // };
+
+    // console.log(contextEditor);
 
     // Execute the code from the editor
     new Function("const alfresco = this;\n" + this.code).bind(contextEditor)();
